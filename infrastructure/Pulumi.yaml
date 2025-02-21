@@ -8,3 +8,8 @@ config:
   pulumi:tags:
     value:
       pulumi:template: aws-typescript
+template:
+  config:
+    aws:region:
+      description: Target AWS region for deployment
+      default: us-east-1

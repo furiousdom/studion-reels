@@ -1,40 +1,70 @@
+import * as awsx from '@pulumi/awsx';
 import * as pulumi from '@pulumi/pulumi';
-import * as aws from '@pulumi/aws';
+import { Database, Project, WebServer } from '@studion/infra-code-blocks';
+import { ecs } from '@pulumi/aws';
 
 const config = new pulumi.Config();
-const currentStack = pulumi.getStack();
+const stack = pulumi.getStack();
+
+const project = new Project(`studion-reels-${stack}`, {
+  services: [],
+  enableSSMConnect: true
+});
 
 const dbUsername = config.requireSecret('dbUsername');
-const dbPassword = config.requireSecret('dbPassword');
 
-const securityGroup = new aws.ec2.SecurityGroup(`reels-security-group-${currentStack}`, {
-  ingress: [
-    { protocol: 'tcp', fromPort: 22, toPort: 22, cidrBlocks: ['0.0.0.0/0'] },
-    { protocol: 'tcp', fromPort: 5432, toPort: 5432, cidrBlocks: ['0.0.0.0/0'] }
+const cluster = new ecs.Cluster(`reels-${stack}-cluster`, {
+  name: `reels-${stack}-cluster`,
+  tags: {
+    Stack: stack
+  }
+});
+
+const database = new Database(`reels-db-${stack}`, {
+  vpcId: project.vpc.vpcId,
+  vpcCidrBlock: project.vpc.vpc.cidrBlock,
+  isolatedSubnetIds: project.vpc.isolatedSubnetIds,
+  dbName: 'reels',
+  username: dbUsername,
+  instanceClass: 'db.t4g.micro'
+});
+
+const webServerImage = createWebServerImage(stack);
+
+const server = new WebServer(`reels-server-${stack}`, {
+  image: webServerImage.imageUri,
+  port: 2800,
+  clusterId: cluster.id,
+  clusterName: cluster.name,
+  vpcId: project.vpc.vpcId,
+  vpcCidrBlock: project.vpc.vpc.cidrBlock,
+  publicSubnetIds: project.vpc.privateSubnetIds,
+  environment: [
+    { name: 'SERVER_PORT', value: '2800' },
+    { name: 'DATABASE_HOST', value: database.instance.address },
+    { name: 'DATABASE_PORT', value: `${database.instance.port}` },
+    { name: 'DATABASE_NAME', value: database.instance.dbName },
+    { name: 'DATABASE_USER', value: database.instance.username },
+    { name: 'DATABASE_PASSWORD', value: `${database.instance.password}` },
+    {
+      name: 'POSTGRES_SSL_ENABLED',
+      value: 'true'
+    }
   ]
 });
 
-const dbInstance = new aws.rds.Instance(`reels-database-${currentStack}`, {
-    engine: 'postgres',
-    instanceClass: 'db.t4g.micro',
-    allocatedStorage: 20,
-    username: dbUsername,
-    password: dbPassword,
-    publiclyAccessible: true,
-    skipFinalSnapshot: true,
-    vpcSecurityGroupIds: [securityGroup.id],
-});
+export {
+  database,
+  server
+};
 
-const ec2Instance = new aws.ec2.Instance(
-  `reels-server-${currentStack}`,
-  {
-    instanceType: 't3.micro',
-    ami: 'ami-07a64b147d3500b6a',
-    securityGroups: [securityGroup.name]
-  },
-  { dependsOn: [dbInstance] }
-);
-
-// Export outputs
-export const ec2PublicIp = ec2Instance.publicIp;
-export const dbEndpoint = dbInstance.endpoint;
+function createWebServerImage(stack: string) {
+  const imageRepository = new awsx.ecr.Repository('studion-reels-repository', {
+    forceDelete: true
+  });
+  return new awsx.ecr.Image(`reels-server-${stack}`, {
+    repositoryUrl: imageRepository.url,
+    context: '../.',
+    platform: 'linux/amd64'
+  });
+}
