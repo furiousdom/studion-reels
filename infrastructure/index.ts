@@ -40,7 +40,7 @@ const server = new WebServer(`reels-server-${stack}`, {
   vpcCidrBlock: project.vpc.vpc.cidrBlock,
   publicSubnetIds: project.vpc.privateSubnetIds,
   environment: [
-    { name: 'SERVER_PORT', value: '2800' },
+    { name: 'PORT', value: '2800' },
     { name: 'DATABASE_HOST', value: database.instance.address },
     { name: 'DATABASE_PORT', value: `${database.instance.port}` },
     { name: 'DATABASE_NAME', value: database.instance.dbName },
