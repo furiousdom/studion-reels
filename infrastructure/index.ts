@@ -43,10 +43,10 @@ const server = new WebServer(`reels-server-${stack}`, {
     { name: 'NODE_ENV', value: 'development' },
     { name: 'PORT', value: '2800' },
     { name: 'DATABASE_HOST', value: database.instance.address },
-    { name: 'DATABASE_PORT', value: `${database.instance.port}` },
+    { name: 'DATABASE_PORT', value: pulumi.interpolate`${database.instance.port}` },
     { name: 'DATABASE_NAME', value: database.instance.dbName },
     { name: 'DATABASE_USER', value: database.instance.username },
-    { name: 'DATABASE_PASSWORD', value: `${database.instance.password}` },
+    { name: 'DATABASE_PASSWORD', value: pulumi.interpolate`${database.instance.password}` },
     {
       name: 'IS_DATABASE_SSL_ENABLED',
       value: 'true'
