@@ -39,6 +39,7 @@ const server = new WebServer(`reels-server-${stack}`, {
   vpcId: project.vpc.vpcId,
   vpcCidrBlock: project.vpc.vpc.cidrBlock,
   publicSubnetIds: project.vpc.privateSubnetIds,
+  healthCheckPath: '/healthcheck',
   environment: [
     { name: 'NODE_ENV', value: 'development' },
     { name: 'PORT', value: '2800' },
