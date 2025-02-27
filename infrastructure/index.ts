@@ -48,7 +48,7 @@ const server = new WebServer(`reels-server-${stack}`, {
     { name: 'DATABASE_USER', value: database.instance.username },
     { name: 'DATABASE_PASSWORD', value: `${database.instance.password}` },
     {
-      name: 'POSTGRES_SSL_ENABLED',
+      name: 'IS_DATABASE_SSL_ENABLED',
       value: 'true'
     }
   ]

@@ -9,7 +9,7 @@ const envSchema = z.object({
   DATABASE_NAME: z.string(),
   DATABASE_USER: z.string(),
   DATABASE_PASSWORD: z.string(),
-  POSTGRES_SSL_ENABLED: z.coerce.boolean()
+  IS_DATABASE_SSL_ENABLED: z.coerce.boolean()
 });
 
 dotenv.config();
