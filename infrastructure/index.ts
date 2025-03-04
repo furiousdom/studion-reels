@@ -38,7 +38,7 @@ const server = new WebServer(`reels-server-${stack}`, {
   clusterName: cluster.name,
   vpcId: project.vpc.vpcId,
   vpcCidrBlock: project.vpc.vpc.cidrBlock,
-  publicSubnetIds: project.vpc.privateSubnetIds,
+  publicSubnetIds: project.vpc.publicSubnetIds,
   healthCheckPath: '/healthcheck',
   environment: [
     { name: 'NODE_ENV', value: 'development' },
