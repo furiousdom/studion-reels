@@ -2,8 +2,20 @@ import { Options, PostgreSqlDriver } from '@mikro-orm/postgresql';
 import config from '../config';
 import { Migrator } from '@mikro-orm/migrations';
 
+const driverOptions = config.IS_DATABASE_SSL_ENABLED
+  ? {
+    connection: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false,
+      },
+    },
+  }
+  : {};
+
 const dbConfig: Options = {
   driver: PostgreSqlDriver,
+  driverOptions,
   host: config.DATABASE_HOST,
   port: config.DATABASE_PORT,
   dbName: config.DATABASE_NAME,

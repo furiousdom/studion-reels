@@ -8,7 +8,8 @@ const envSchema = z.object({
   DATABASE_PORT: z.coerce.number().positive(),
   DATABASE_NAME: z.string(),
   DATABASE_USER: z.string(),
-  DATABASE_PASSWORD: z.string()
+  DATABASE_PASSWORD: z.string(),
+  IS_DATABASE_SSL_ENABLED: z.coerce.boolean()
 });
 
 dotenv.config();

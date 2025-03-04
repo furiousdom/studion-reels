@@ -1,0 +1,15 @@
+name: studion-reels
+description: A minimal AWS TypeScript Pulumi program
+runtime:
+  name: nodejs
+  options:
+    packagemanager: npm
+config:
+  pulumi:tags:
+    value:
+      pulumi:template: aws-typescript
+template:
+  config:
+    aws:region:
+      description: Target AWS region for deployment
+      default: us-east-1
