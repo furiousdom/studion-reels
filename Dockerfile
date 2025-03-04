@@ -19,7 +19,8 @@ FROM base AS configure
 WORKDIR /usr/src/app
 COPY --chown=node:node --from=build /usr/src/app/dist ./dist
 COPY --chown=node:node --from=install /usr/src/app/node_modules ./node_modules
+COPY --chown=node:node --from=install /usr/src/app/package.json ./package.json
 
 FROM configure AS run
 USER node
-CMD [ "node", "dist/index.js" ]
+CMD npm run migration:up && npm run start
